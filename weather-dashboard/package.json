@@ -1,0 +1,12 @@
+{
+  "name": "weather-dashboard",
+  "version": "1.0.0",
+  "description": "A weather dashboard using the OpenWeatherMap API",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.5"
+  }
+}
