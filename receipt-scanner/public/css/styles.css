@@ -1,0 +1,307 @@
+/* ── Design tokens (matching Level 1 theme) ─────────────────── */
+:root {
+  --bg-primary:    #0f0f1a;
+  --bg-card:       #1a1a2e;
+  --accent:        #7c3aed;
+  --accent-hover:  #6d28d9;
+  --text-primary:  #f1f5f9;
+  --text-secondary:#94a3b8;
+  --text-muted:    #64748b;
+  --border:        rgba(124, 58, 237, 0.2);
+  --border-subtle: rgba(255, 255, 255, 0.07);
+  --shadow:        rgba(0, 0, 0, 0.5);
+  --error:         #ef4444;
+  --success:       #10b981;
+}
+
+/* ── Reset & base ───────────────────────────────────────────── */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background-color: var(--bg-primary);
+  background-image:
+    radial-gradient(ellipse at 20% 50%, rgba(124, 58, 237, 0.08) 0%, transparent 60%),
+    radial-gradient(ellipse at 80% 20%, rgba(59, 130, 246, 0.05) 0%, transparent 50%);
+  color: var(--text-primary);
+  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  min-height: 100vh;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 40px 20px;
+}
+
+/* ── Layout ─────────────────────────────────────────────────── */
+.container {
+  width: 100%;
+  max-width: 520px;
+}
+
+/* ── Heading ────────────────────────────────────────────────── */
+h1 {
+  text-align: center;
+  font-size: 1.75rem;
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  margin-bottom: 8px;
+  background: linear-gradient(135deg, #a78bfa, #60a5fa);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.subtitle {
+  text-align: center;
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  margin-bottom: 28px;
+}
+
+/* ── Upload zone ────────────────────────────────────────────── */
+.upload-zone {
+  background: var(--bg-card);
+  border: 2px dashed var(--border);
+  border-radius: 16px;
+  padding: 40px 24px;
+  text-align: center;
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s;
+  margin-bottom: 16px;
+}
+
+.upload-zone:hover,
+.upload-zone.drag-over {
+  border-color: var(--accent);
+  background: rgba(124, 58, 237, 0.06);
+}
+
+.upload-icon {
+  font-size: 2.5rem;
+  margin-bottom: 12px;
+  filter: grayscale(0.3);
+}
+
+.upload-label {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 4px;
+}
+
+.upload-hint {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+/* ── Preview ────────────────────────────────────────────────── */
+.preview-wrapper {
+  display: none;
+  position: relative;
+  margin-bottom: 16px;
+  border-radius: 16px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+}
+
+.preview-wrapper.visible {
+  display: block;
+}
+
+#preview-img {
+  width: 100%;
+  max-height: 320px;
+  object-fit: contain;
+  background: var(--bg-card);
+  display: block;
+}
+
+.clear-btn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: rgba(0, 0, 0, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: var(--text-primary);
+  border-radius: 50%;
+  width: 30px;
+  height: 30px;
+  font-size: 0.85rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s;
+}
+
+.clear-btn:hover {
+  background: rgba(239, 68, 68, 0.5);
+}
+
+/* ── Scan button ────────────────────────────────────────────── */
+.scan-btn {
+  width: 100%;
+  padding: 14px;
+  background: var(--accent);
+  border: none;
+  border-radius: 12px;
+  color: #fff;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.1s, opacity 0.2s;
+  margin-bottom: 16px;
+}
+
+.scan-btn:hover:not(:disabled) { background: var(--accent-hover); }
+.scan-btn:active:not(:disabled) { transform: scale(0.98); }
+.scan-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.scan-btn.loading {
+  opacity: 0.7;
+  cursor: not-allowed;
+  background: var(--accent-hover);
+}
+
+/* ── Error message ──────────────────────────────────────────── */
+.error-message {
+  display: none;
+  text-align: center;
+  color: var(--error);
+  font-size: 0.9rem;
+  padding: 12px 16px;
+  border-radius: 10px;
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  margin-bottom: 16px;
+}
+
+.error-message:not(:empty) {
+  display: block;
+}
+
+/* ── Results card ───────────────────────────────────────────── */
+.results-card {
+  display: none;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 20px 60px var(--shadow);
+  animation: fadeSlideIn 0.35s ease;
+}
+
+.results-card.visible {
+  display: block;
+}
+
+@keyframes fadeSlideIn {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: translateY(0);    }
+}
+
+/* ── Results header ─────────────────────────────────────────── */
+.results-header {
+  padding: 20px 24px 16px;
+  border-bottom: 1px solid var(--border-subtle);
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+}
+
+.store-name {
+  font-size: 1.2rem;
+  font-weight: 700;
+  background: linear-gradient(135deg, #a78bfa, #60a5fa);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.receipt-date {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+/* ── Items table ────────────────────────────────────────────── */
+.items-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.items-table thead th {
+  padding: 10px 24px;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+  text-align: left;
+  background: rgba(255, 255, 255, 0.02);
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.items-table thead th.price-col {
+  text-align: right;
+}
+
+.items-table tbody tr {
+  border-bottom: 1px solid var(--border-subtle);
+  transition: background 0.15s;
+}
+
+.items-table tbody tr:last-child {
+  border-bottom: none;
+}
+
+.items-table tbody tr:hover {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.items-table td {
+  padding: 12px 24px;
+  font-size: 0.95rem;
+}
+
+.items-table td:last-child {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-secondary);
+}
+
+/* ── Totals ─────────────────────────────────────────────────── */
+.totals {
+  padding: 16px 24px 20px;
+  border-top: 1px solid var(--border-subtle);
+  background: rgba(255, 255, 255, 0.02);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.total-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+}
+
+.total-row span:last-child {
+  font-variant-numeric: tabular-nums;
+}
+
+.total-row.total-final {
+  margin-top: 8px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}

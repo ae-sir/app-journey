@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Receipt Scanner</title>
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+  <div class="container">
+    <h1>Receipt Scanner</h1>
+    <p class="subtitle">Upload a photo of any receipt — AI will extract the details</p>
+
+    <!-- Upload zone -->
+    <div class="upload-zone" id="upload-zone">
+      <div class="upload-icon">&#128247;</div>
+      <p class="upload-label">Drag &amp; drop a receipt photo</p>
+      <p class="upload-hint">or click to browse your files</p>
+      <input type="file" id="file-input" accept="image/*" hidden />
+    </div>
+
+    <!-- Image preview -->
+    <div class="preview-wrapper" id="preview-wrapper">
+      <img id="preview-img" src="" alt="Receipt preview" />
+      <button class="clear-btn" id="clear-btn" title="Remove image">&#x2715;</button>
+    </div>
+
+    <!-- Scan button -->
+    <button class="scan-btn" id="scan-btn" disabled>Scan Receipt</button>
+
+    <!-- Error message -->
+    <p class="error-message" id="error-message"></p>
+
+    <!-- Results card -->
+    <div class="results-card" id="results-card">
+      <div class="results-header">
+        <div class="store-name" id="store-name"></div>
+        <div class="receipt-date" id="receipt-date"></div>
+      </div>
+
+      <table class="items-table" id="items-table">
+        <thead>
+          <tr>
+            <th>Item</th>
+            <th class="price-col">Price</th>
+          </tr>
+        </thead>
+        <tbody id="items-body"></tbody>
+      </table>
+
+      <div class="totals">
+        <div class="total-row" id="subtotal-row">
+          <span>Subtotal</span>
+          <span id="subtotal-value"></span>
+        </div>
+        <div class="total-row" id="tax-row">
+          <span>Tax</span>
+          <span id="tax-value"></span>
+        </div>
+        <div class="total-row total-final">
+          <span>Total</span>
+          <span id="total-value"></span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/app.js"></script>
+</body>
+</html>

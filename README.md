@@ -10,3 +10,6 @@
 
 ### 3. What happens when you type a fake city? Where in the code does that get caught, and what does the user see?
     When you type a fake city, an error is thrown and the dashboard displays "No city found in "example wrong city". Please check spelling and try again". The input city is checked in the: if !response.ok section of the code. If the error is thrown (i.e. 404 error), this code then triggers the err.message to be displayed. The err.message is whatever string is denoted in the new Error block
+
+    To preview code, use "CTRL+SHIFT+V"
+    
