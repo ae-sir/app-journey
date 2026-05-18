@@ -2,7 +2,7 @@ require('dotenv').config();
 
 const express = require('express');
 const multer = require('multer');
-const Anthropic = require('@anthropic-ai/sdk');
+const Anthropic = require('@anthropic-ai/sdk/index.mjs');
 const path = require('path');
 
 const PORT = process.env.PORT || 3001;

@@ -1,0 +1,14 @@
+{
+  "name": "level-3-expense-tracker",
+  "version": "1.0.0",
+  "description": "Personal expense tracker — Level 3 of the app journey, teaching CRUD with Supabase/PostgreSQL",
+  "main": "build.js",
+  "scripts": {
+    "build": "node build.js",
+    "start": "node build.js && npx serve public"
+  },
+  "type": "commonjs",
+  "dependencies": {
+    "dotenv": "^16.6.1"
+  }
+}

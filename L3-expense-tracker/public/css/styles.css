@@ -1,0 +1,284 @@
+/* ── Reset & base ─────────────────────────────────────────── */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+:root {
+  --bg:           #0f1117;
+  --surface:      #1a1d2e;
+  --surface-2:    #252840;
+  --border:       #2e3155;
+  --accent:       #6c63ff;
+  --accent-hover: #5751e0;
+  --danger:       #e05b5b;
+  --danger-hover: #c44c4c;
+  --success:      #3ec97e;
+  --text:         #e2e4f0;
+  --text-muted:   #8b8fa8;
+  --radius:       8px;
+}
+
+body {
+  background-color: var(--bg);
+  color: var(--text);
+  font-family: 'Segoe UI', system-ui, sans-serif;
+  font-size: 15px;
+  line-height: 1.6;
+  padding: 2rem 1rem;
+}
+
+/* ── Layout ───────────────────────────────────────────────── */
+.container {
+  max-width: 900px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+/* ── Header ───────────────────────────────────────────────── */
+header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+h1 {
+  font-size: 1.8rem;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+}
+
+h2 {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 1rem;
+}
+
+.total-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 0.75rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.total-label {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.total-amount {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: var(--accent);
+  transition: color 0.2s;
+}
+
+/* ── Add-expense form ─────────────────────────────────────── */
+.add-expense {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1.5rem;
+}
+
+form {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+input, select {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text);
+  font-size: 0.95rem;
+  padding: 0.55rem 0.85rem;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+input:focus, select:focus {
+  border-color: var(--accent);
+}
+
+input::placeholder {
+  color: var(--text-muted);
+}
+
+#description { flex: 2; min-width: 160px; }
+#amount      { flex: 1; min-width: 100px; }
+#category    { flex: 1; min-width: 130px; cursor: pointer; }
+
+button {
+  border: none;
+  border-radius: var(--radius);
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 600;
+  padding: 0.55rem 1.1rem;
+  transition: background 0.2s, opacity 0.2s;
+}
+
+.btn-add {
+  background: var(--accent);
+  color: #fff;
+}
+
+.btn-add:hover { background: var(--accent-hover); }
+
+/* ── Status messages ──────────────────────────────────────── */
+.status {
+  min-height: 1.4rem;
+  font-size: 0.9rem;
+  border-radius: var(--radius);
+  transition: all 0.2s;
+}
+
+.status.error   { color: var(--danger);  background: rgba(224,91,91,0.12);  padding: 0.5rem 1rem; }
+.status.success { color: var(--success); background: rgba(62,201,126,0.12); padding: 0.5rem 1rem; }
+
+/* ── Expense table ────────────────────────────────────────── */
+.expense-list {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1.5rem;
+}
+
+.list-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+
+.list-header h2 {
+  margin-bottom: 0;
+}
+
+.list-header select {
+  min-width: 160px;
+}
+
+.table-wrapper {
+  overflow-x: auto;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+thead th {
+  text-align: left;
+  font-size: 0.78rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--text-muted);
+  padding: 0 0.75rem 0.75rem;
+  border-bottom: 1px solid var(--border);
+}
+
+tbody tr {
+  border-bottom: 1px solid var(--border);
+  transition: background 0.15s;
+}
+
+tbody tr:last-child { border-bottom: none; }
+tbody tr:hover      { background: var(--surface-2); }
+
+tbody tr.editing    { background: var(--surface-2); }
+
+td {
+  padding: 0.75rem;
+  vertical-align: middle;
+}
+
+td.amount { font-weight: 600; }
+td.date   { color: var(--text-muted); font-size: 0.88rem; white-space: nowrap; }
+
+.loading {
+  color: var(--text-muted);
+  text-align: center;
+  padding: 2rem;
+}
+
+.empty {
+  color: var(--text-muted);
+}
+
+/* ── Category badges ─────────────────────────────────────── */
+.category-badge {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  font-size: 0.78rem;
+  padding: 0.2rem 0.65rem;
+  white-space: nowrap;
+}
+
+/* ── Row action buttons ───────────────────────────────────── */
+td.actions {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.btn-edit {
+  background: var(--surface-2);
+  color: var(--text);
+  border: 1px solid var(--border);
+}
+
+.btn-edit:hover { border-color: var(--accent); color: var(--accent); }
+
+.btn-delete {
+  background: transparent;
+  color: var(--danger);
+  border: 1px solid transparent;
+}
+
+.btn-delete:hover { border-color: var(--danger); background: rgba(224,91,91,0.1); }
+
+.btn-save {
+  background: var(--success);
+  color: #0f1117;
+}
+
+.btn-save:hover { opacity: 0.85; }
+
+.btn-cancel {
+  background: transparent;
+  color: var(--text-muted);
+  border: 1px solid var(--border);
+}
+
+.btn-cancel:hover { color: var(--text); }
+
+/* ── Inline edit inputs ───────────────────────────────────── */
+.edit-input {
+  background: var(--bg);
+  border: 1px solid var(--accent);
+  border-radius: var(--radius);
+  color: var(--text);
+  font-size: 0.9rem;
+  padding: 0.3rem 0.6rem;
+  width: 100%;
+}
+
+.edit-input:focus { outline: none; box-shadow: 0 0 0 2px rgba(108,99,255,0.3); }
