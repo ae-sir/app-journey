@@ -286,6 +286,24 @@
     .empty-state .empty-icon { font-size: 3rem; margin-bottom: 12px; }
     .empty-state p { font-size: 0.9rem; }
 
+    /* ─── Filter Bar ───────────────────────────────────────── */
+    .filter-bar { margin-bottom: 20px; display: flex; flex-direction: column; gap: 8px; }
+    .filter-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .filter-label {
+      font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase;
+      letter-spacing: 0.5px; min-width: 34px; flex-shrink: 0;
+    }
+    .filter-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+    .filter-chip {
+      background: var(--surface2); color: var(--text-muted);
+      border: 1px solid var(--border);
+      padding: 5px 12px; border-radius: 999px;
+      font-size: 0.78rem; cursor: pointer; text-transform: capitalize;
+      transition: background 0.15s, color 0.15s, border-color 0.15s;
+    }
+    .filter-chip:hover { color: var(--text); border-color: var(--text-muted); }
+    .filter-chip.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+
     /* ─── Upload spinner ───────────────────────────────────── */
     @keyframes spin { to { transform: rotate(360deg); } }
     .spinner {
@@ -372,6 +390,18 @@
     <h2>Your Wardrobe</h2>
     <span class="item-count" id="item-count"></span>
   </div>
+
+  <!-- ── Filter Bar ────────────────────────────────────────── -->
+  <div class="filter-bar" id="filter-bar" style="display:none">
+    <div class="filter-row">
+      <span class="filter-label">Type</span>
+      <div class="filter-chips" id="type-filter"></div>
+    </div>
+    <div class="filter-row" id="tag-filter-row" style="display:none">
+      <span class="filter-label">Tags</span>
+      <div class="filter-chips" id="tag-filter"></div>
+    </div>
+  </div>
   <div class="wardrobe-grid" id="wardrobe-grid">
     <div class="empty-state">
       <div class="empty-icon">👗</div>
@@ -385,6 +415,8 @@
 // ─── State ──────────────────────────────────────────────────────────────────
 let allItems = [];
 const selectedIds = new Set();
+let activeType = null;
+let activeTag  = null;
 
 // ─── DOM refs ────────────────────────────────────────────────────────────────
 const form = document.getElementById('upload-form');
@@ -398,7 +430,11 @@ const itemCount = document.getElementById('item-count');
 const outfitPanel = document.getElementById('outfit-panel');
 const outfitItems = document.getElementById('outfit-items');
 const outfitCount = document.getElementById('outfit-count');
-const clearBtn = document.getElementById('clear-btn');
+const clearBtn      = document.getElementById('clear-btn');
+const filterBar     = document.getElementById('filter-bar');
+const typeFilter    = document.getElementById('type-filter');
+const tagFilter     = document.getElementById('tag-filter');
+const tagFilterRow  = document.getElementById('tag-filter-row');
 
 // ─── Image preview in drop zone ──────────────────────────────────────────────
 imageInput.addEventListener('change', () => {
@@ -479,9 +515,19 @@ async function loadItems() {
 }
 
 function renderGrid() {
-  itemCount.textContent = allItems.length ? `${allItems.length} item${allItems.length !== 1 ? 's' : ''}` : '';
+  buildFilters();
+  const items = getFilteredItems();
 
-  if (allItems.length === 0) {
+  const total = allItems.length;
+  if (total === 0) {
+    itemCount.textContent = '';
+  } else if (items.length === total) {
+    itemCount.textContent = `${total} item${total !== 1 ? 's' : ''}`;
+  } else {
+    itemCount.textContent = `${items.length} of ${total} items`;
+  }
+
+  if (total === 0) {
     grid.innerHTML = `
       <div class="empty-state">
         <div class="empty-icon">👗</div>
@@ -490,7 +536,12 @@ function renderGrid() {
     return;
   }
 
-  grid.innerHTML = allItems.map(item => `
+  if (items.length === 0) {
+    grid.innerHTML = `<div class="empty-state"><p>No items match that filter.</p></div>`;
+    return;
+  }
+
+  grid.innerHTML = items.map(item => `
     <div class="item-card ${selectedIds.has(item.id) ? 'selected' : ''}"
          data-id="${item.id}"
          role="button"
@@ -516,6 +567,44 @@ function renderGrid() {
     });
   });
 }
+
+// ─── Filtering ───────────────────────────────────────────────────────────────
+function buildFilters() {
+  if (allItems.length === 0) { filterBar.style.display = 'none'; return; }
+  filterBar.style.display = 'flex';
+
+  const types = [...new Set(allItems.map(i => i.item_type))].sort();
+  const tags  = [...new Set(allItems.flatMap(i => i.tags || []))].sort();
+
+  // If the active filter value was deleted, reset it
+  if (activeType && !types.includes(activeType)) activeType = null;
+  if (activeTag  && !tags.includes(activeTag))   activeTag  = null;
+
+  typeFilter.innerHTML = [
+    `<button class="filter-chip ${!activeType ? 'active' : ''}" onclick="setTypeFilter(null)">All</button>`,
+    ...types.map(t => `<button class="filter-chip ${activeType === t ? 'active' : ''}" onclick="setTypeFilter('${t}')">${t}</button>`)
+  ].join('');
+
+  if (tags.length) {
+    tagFilterRow.style.display = 'flex';
+    tagFilter.innerHTML = tags.map(t =>
+      `<button class="filter-chip ${activeTag === t ? 'active' : ''}" onclick="setTagFilter('${t}')">${t}</button>`
+    ).join('');
+  } else {
+    tagFilterRow.style.display = 'none';
+  }
+}
+
+function getFilteredItems() {
+  return allItems.filter(item => {
+    const typeMatch = !activeType || item.item_type === activeType;
+    const tagMatch  = !activeTag  || (item.tags && item.tags.includes(activeTag));
+    return typeMatch && tagMatch;
+  });
+}
+
+function setTypeFilter(type) { activeType = type; renderGrid(); }
+function setTagFilter(tag)   { activeTag = activeTag === tag ? null : tag; renderGrid(); }
 
 // ─── Selection & outfit panel ────────────────────────────────────────────────
 function toggleSelect(id) {

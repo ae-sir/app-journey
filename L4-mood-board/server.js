@@ -6,6 +6,7 @@ const FormData = require('form-data');
 const { createClient } = require('@supabase/supabase-js');
 const path = require('path');
 const fs = require('fs');
+const { randomUUID } = require('crypto');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -103,7 +104,7 @@ app.post('/api/upload', upload.single('image'), async (req, res) => {
   }
 
   // ── Step 2: Save the processed PNG to /uploads ───────────────────────────
-  const filename = `item_${Date.now()}.png`;
+  const filename = `item_${randomUUID()}.png`;
   const filepath = path.join(uploadsDir, filename);
   fs.writeFileSync(filepath, processedImageBuffer);
 
