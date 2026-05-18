@@ -1,0 +1,17 @@
+{
+  "name": "l4-outfit-mood-board",
+  "version": "1.0.0",
+  "description": "Outfit mood board with background removal — Level 4 of the app journey",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.45.0",
+    "axios": "^1.7.0",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "form-data": "^4.0.0",
+    "multer": "^2.1.1"
+  }
+}

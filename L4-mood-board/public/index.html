@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Wardrobe — Outfit Mood Board</title>
+  <style>
+    /* ─── Reset & Base ─────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #0f1117;
+      --surface:   #1a1d27;
+      --surface2:  #22263a;
+      --border:    #2e3250;
+      --accent:    #7c6dfa;
+      --accent2:   #b39dff;
+      --danger:    #f87171;
+      --text:      #e8eaf6;
+      --text-muted:#8b90b8;
+      --card-bg:   #ffffff;
+      --radius:    12px;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      min-height: 100vh;
+    }
+
+    /* ─── Layout ───────────────────────────────────────────── */
+    header {
+      padding: 24px 40px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    header h1 { font-size: 1.25rem; font-weight: 600; letter-spacing: -0.3px; }
+    header span { font-size: 0.8rem; color: var(--text-muted); background: var(--surface2);
+      padding: 3px 10px; border-radius: 999px; }
+
+    main { max-width: 1200px; margin: 0 auto; padding: 32px 40px; }
+
+    /* ─── Upload Panel ─────────────────────────────────────── */
+    .upload-panel {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 28px;
+      margin-bottom: 36px;
+    }
+    .upload-panel h2 { font-size: 0.9rem; text-transform: uppercase;
+      letter-spacing: 1px; color: var(--text-muted); margin-bottom: 20px; }
+
+    .upload-form { display: flex; flex-wrap: wrap; gap: 14px; align-items: flex-end; }
+
+    .field { display: flex; flex-direction: column; gap: 6px; }
+    .field label { font-size: 0.78rem; color: var(--text-muted); text-transform: uppercase;
+      letter-spacing: 0.5px; }
+
+    .upload-form input[type="text"],
+    .upload-form select {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 9px 13px;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      min-width: 160px;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+    .upload-form input:focus, .upload-form select:focus { border-color: var(--accent); }
+
+    /* File drop zone */
+    .drop-zone {
+      position: relative;
+      border: 2px dashed var(--border);
+      border-radius: 8px;
+      padding: 18px 24px;
+      cursor: pointer;
+      text-align: center;
+      min-width: 220px;
+      transition: border-color 0.15s, background 0.15s;
+    }
+    .drop-zone:hover, .drop-zone.dragover {
+      border-color: var(--accent);
+      background: rgba(124, 109, 250, 0.05);
+    }
+    .drop-zone input[type="file"] {
+      position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%;
+    }
+    .drop-zone .drop-label { font-size: 0.85rem; color: var(--text-muted); pointer-events: none; }
+    .drop-zone .drop-label strong { color: var(--text); display: block; margin-bottom: 2px; }
+    .drop-zone .preview-img {
+      width: 70px; height: 70px; object-fit: contain; border-radius: 6px;
+      margin-bottom: 6px; pointer-events: none;
+    }
+
+    /* Buttons */
+    .btn-primary {
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      padding: 10px 22px;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity 0.15s, transform 0.1s;
+      white-space: nowrap;
+    }
+    .btn-primary:hover { opacity: 0.9; }
+    .btn-primary:active { transform: scale(0.97); }
+    .btn-primary:disabled { opacity: 0.45; cursor: not-allowed; }
+
+    .btn-ghost {
+      background: transparent;
+      color: var(--text-muted);
+      border: 1px solid var(--border);
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      cursor: pointer;
+      transition: color 0.15s, border-color 0.15s;
+    }
+    .btn-ghost:hover { color: var(--text); border-color: var(--text-muted); }
+
+    /* Status / error */
+    .status-bar {
+      margin-top: 16px;
+      padding: 10px 14px;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      display: none;
+    }
+    .status-bar.error { background: rgba(248,113,113,0.12); color: var(--danger);
+      border: 1px solid rgba(248,113,113,0.3); display: block; }
+    .status-bar.loading { background: rgba(124,109,250,0.1); color: var(--accent2);
+      border: 1px solid rgba(124,109,250,0.2); display: block; }
+    .status-bar.success { background: rgba(74,222,128,0.1); color: #4ade80;
+      border: 1px solid rgba(74,222,128,0.2); display: block; }
+
+    /* ─── Outfit Builder ───────────────────────────────────── */
+    .outfit-panel {
+      background: var(--surface);
+      border: 1px solid var(--accent);
+      border-radius: var(--radius);
+      padding: 24px 28px;
+      margin-bottom: 36px;
+      display: none;
+    }
+    .outfit-panel.visible { display: block; }
+    .outfit-header {
+      display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px;
+    }
+    .outfit-header h2 { font-size: 1rem; font-weight: 600; }
+    .outfit-items {
+      display: flex; flex-wrap: wrap; gap: 16px; align-items: flex-end;
+    }
+    .outfit-item {
+      position: relative; text-align: center;
+    }
+    .outfit-item img {
+      width: 120px; height: 140px; object-fit: contain;
+      background: #fff; border-radius: 10px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+    }
+    .outfit-item .outfit-label {
+      font-size: 0.7rem; color: var(--text-muted); margin-top: 6px;
+      text-transform: capitalize;
+    }
+    .outfit-item .deselect-btn {
+      position: absolute; top: -6px; right: -6px;
+      background: var(--danger); color: #fff;
+      border: none; border-radius: 50%; width: 20px; height: 20px;
+      font-size: 11px; cursor: pointer; line-height: 20px; text-align: center;
+      display: flex; align-items: center; justify-content: center;
+    }
+
+    /* ─── Wardrobe Grid ────────────────────────────────────── */
+    .section-header {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 20px;
+    }
+    .section-header h2 { font-size: 1rem; font-weight: 600; }
+    .item-count { font-size: 0.8rem; color: var(--text-muted); }
+
+    .wardrobe-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 20px;
+    }
+
+    /* ─── Item Card ────────────────────────────────────────── */
+    .item-card {
+      background: var(--card-bg);
+      border-radius: var(--radius);
+      overflow: hidden;
+      cursor: pointer;
+      position: relative;
+      transition: transform 0.15s, box-shadow 0.15s;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.2);
+    }
+    .item-card:hover { transform: translateY(-3px); box-shadow: 0 8px 24px rgba(0,0,0,0.3); }
+    .item-card.selected {
+      outline: 3px solid var(--accent);
+      outline-offset: 2px;
+      transform: translateY(-3px);
+      box-shadow: 0 8px 24px rgba(124,109,250,0.35);
+    }
+
+    .item-card img {
+      width: 100%;
+      aspect-ratio: 3/4;
+      object-fit: contain;
+      background: #f8f8f8;
+      padding: 12px;
+      display: block;
+    }
+
+    .card-meta {
+      background: #fff;
+      padding: 10px 12px;
+      border-top: 1px solid #eee;
+    }
+    .card-type {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: #1a1a2e;
+      text-transform: capitalize;
+    }
+    .card-colour {
+      font-size: 0.75rem;
+      color: #666;
+      margin-top: 2px;
+      text-transform: capitalize;
+    }
+    .card-tags {
+      display: flex; flex-wrap: wrap; gap: 4px; margin-top: 7px;
+    }
+    .tag {
+      font-size: 0.65rem;
+      background: #f0eeff;
+      color: #5a4fcf;
+      padding: 2px 7px;
+      border-radius: 999px;
+      text-transform: capitalize;
+    }
+
+    .selected-badge {
+      position: absolute; top: 8px; right: 8px;
+      background: var(--accent);
+      color: #fff;
+      border-radius: 50%;
+      width: 26px; height: 26px;
+      display: none;
+      align-items: center; justify-content: center;
+      font-size: 0.75rem; font-weight: 700;
+    }
+    .item-card.selected .selected-badge { display: flex; }
+
+    .delete-btn {
+      position: absolute; top: 8px; left: 8px;
+      background: rgba(0,0,0,0.55);
+      color: #fff;
+      border: none; border-radius: 50%;
+      width: 26px; height: 26px;
+      font-size: 14px;
+      cursor: pointer;
+      opacity: 0;
+      transition: opacity 0.15s;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .item-card:hover .delete-btn { opacity: 1; }
+
+    /* ─── Empty State ──────────────────────────────────────── */
+    .empty-state {
+      grid-column: 1/-1;
+      text-align: center;
+      padding: 60px 20px;
+      color: var(--text-muted);
+    }
+    .empty-state .empty-icon { font-size: 3rem; margin-bottom: 12px; }
+    .empty-state p { font-size: 0.9rem; }
+
+    /* ─── Upload spinner ───────────────────────────────────── */
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .spinner {
+      display: inline-block; width: 14px; height: 14px;
+      border: 2px solid rgba(255,255,255,0.3);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      vertical-align: middle; margin-right: 6px;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>Wardrobe</h1>
+  <span>Level 4 — Outfit Mood Board</span>
+</header>
+
+<main>
+
+  <!-- ── Upload Panel ──────────────────────────────────────── -->
+  <div class="upload-panel">
+    <h2>Add a clothing item</h2>
+    <form class="upload-form" id="upload-form">
+
+      <div class="drop-zone" id="drop-zone">
+        <input type="file" id="image-input" name="image" accept="image/*" required>
+        <div class="drop-label" id="drop-label">
+          <strong>Choose a photo</strong>
+          or drag it here
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="item-type">Item type</label>
+        <select id="item-type" name="item_type" required>
+          <option value="">Select...</option>
+          <option value="top">Top</option>
+          <option value="pants">Pants</option>
+          <option value="dress">Dress</option>
+          <option value="skirt">Skirt</option>
+          <option value="shoes">Shoes</option>
+          <option value="jacket">Jacket</option>
+          <option value="accessory">Accessory</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label for="colour">Colour</label>
+        <input type="text" id="colour" name="colour" placeholder="e.g. navy blue" list="colour-suggestions">
+        <datalist id="colour-suggestions">
+          <option value="black"><option value="white"><option value="grey">
+          <option value="navy blue"><option value="red"><option value="pink">
+          <option value="green"><option value="beige"><option value="brown">
+          <option value="yellow"><option value="orange"><option value="purple">
+        </datalist>
+      </div>
+
+      <div class="field">
+        <label for="tags">Tags</label>
+        <input type="text" id="tags" name="tags" placeholder="casual, summer, formal">
+      </div>
+
+      <button type="submit" class="btn-primary" id="upload-btn">
+        Upload &amp; Strip Background
+      </button>
+    </form>
+
+    <div class="status-bar" id="status-bar"></div>
+  </div>
+
+  <!-- ── Outfit Builder ────────────────────────────────────── -->
+  <div class="outfit-panel" id="outfit-panel">
+    <div class="outfit-header">
+      <h2>Your Outfit <span id="outfit-count" style="color:var(--text-muted);font-weight:400;font-size:0.85rem;"></span></h2>
+      <button class="btn-ghost" id="clear-btn">Clear selection</button>
+    </div>
+    <div class="outfit-items" id="outfit-items"></div>
+  </div>
+
+  <!-- ── Wardrobe Grid ─────────────────────────────────────── -->
+  <div class="section-header">
+    <h2>Your Wardrobe</h2>
+    <span class="item-count" id="item-count"></span>
+  </div>
+  <div class="wardrobe-grid" id="wardrobe-grid">
+    <div class="empty-state">
+      <div class="empty-icon">👗</div>
+      <p>Your wardrobe is empty — upload a clothing item to get started.</p>
+    </div>
+  </div>
+
+</main>
+
+<script>
+// ─── State ──────────────────────────────────────────────────────────────────
+let allItems = [];
+const selectedIds = new Set();
+
+// ─── DOM refs ────────────────────────────────────────────────────────────────
+const form = document.getElementById('upload-form');
+const uploadBtn = document.getElementById('upload-btn');
+const statusBar = document.getElementById('status-bar');
+const imageInput = document.getElementById('image-input');
+const dropZone = document.getElementById('drop-zone');
+const dropLabel = document.getElementById('drop-label');
+const grid = document.getElementById('wardrobe-grid');
+const itemCount = document.getElementById('item-count');
+const outfitPanel = document.getElementById('outfit-panel');
+const outfitItems = document.getElementById('outfit-items');
+const outfitCount = document.getElementById('outfit-count');
+const clearBtn = document.getElementById('clear-btn');
+
+// ─── Image preview in drop zone ──────────────────────────────────────────────
+imageInput.addEventListener('change', () => {
+  const file = imageInput.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    dropLabel.innerHTML = `
+      <img class="preview-img" src="${e.target.result}" alt="preview">
+      <span style="font-size:0.8rem">${file.name}</span>
+    `;
+  };
+  reader.readAsDataURL(file);
+});
+
+dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.classList.add('dragover'); });
+dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
+dropZone.addEventListener('drop', (e) => {
+  e.preventDefault();
+  dropZone.classList.remove('dragover');
+  if (e.dataTransfer.files[0]) {
+    imageInput.files = e.dataTransfer.files;
+    imageInput.dispatchEvent(new Event('change'));
+  }
+});
+
+// ─── Upload form submit ──────────────────────────────────────────────────────
+form.addEventListener('submit', async (e) => {
+  e.preventDefault();
+
+  setStatus('loading', '<span class="spinner"></span> Removing background — this takes a few seconds…');
+  uploadBtn.disabled = true;
+
+  // FormData automatically packages all form fields including the file
+  // in multipart/form-data format — the browser handles encoding for us
+  const formData = new FormData(form);
+
+  try {
+    const res = await fetch('/api/upload', { method: 'POST', body: formData });
+    const data = await res.json();
+
+    if (!res.ok) {
+      setStatus('error', data.error || 'Upload failed.');
+      return;
+    }
+
+    setStatus('success', 'Item added to your wardrobe!');
+    form.reset();
+    dropLabel.innerHTML = '<strong>Choose a photo</strong>or drag it here';
+    await loadItems();
+
+    setTimeout(() => hideStatus(), 3000);
+  } catch (err) {
+    setStatus('error', `Network error: ${err.message}`);
+  } finally {
+    uploadBtn.disabled = false;
+  }
+});
+
+// ─── Load & render items ─────────────────────────────────────────────────────
+async function loadItems() {
+  try {
+    const res = await fetch('/api/items');
+    const data = await res.json();
+
+    if (!res.ok) {
+      throw new Error(data.error || `Server error ${res.status}`);
+    }
+    if (!Array.isArray(data)) {
+      throw new Error('Unexpected response from server — expected a list of items.');
+    }
+
+    allItems = data;
+    renderGrid();
+  } catch (err) {
+    grid.innerHTML = `<div class="empty-state"><p style="color:var(--danger)">Could not load wardrobe: ${err.message}</p></div>`;
+  }
+}
+
+function renderGrid() {
+  itemCount.textContent = allItems.length ? `${allItems.length} item${allItems.length !== 1 ? 's' : ''}` : '';
+
+  if (allItems.length === 0) {
+    grid.innerHTML = `
+      <div class="empty-state">
+        <div class="empty-icon">👗</div>
+        <p>Your wardrobe is empty — upload a clothing item to get started.</p>
+      </div>`;
+    return;
+  }
+
+  grid.innerHTML = allItems.map(item => `
+    <div class="item-card ${selectedIds.has(item.id) ? 'selected' : ''}"
+         data-id="${item.id}"
+         role="button"
+         aria-label="${item.item_type}">
+      <button class="delete-btn" data-id="${item.id}" title="Delete item" onclick="deleteItem(event,'${item.id}')">✕</button>
+      <div class="selected-badge">${[...selectedIds].indexOf(item.id) + 1}</div>
+      <img src="/uploads/${item.filename}" alt="${item.item_type}" loading="lazy">
+      <div class="card-meta">
+        <div class="card-type">${item.item_type}</div>
+        ${item.colour ? `<div class="card-colour">${item.colour}</div>` : ''}
+        ${item.tags && item.tags.length
+          ? `<div class="card-tags">${item.tags.map(t => `<span class="tag">${t}</span>`).join('')}</div>`
+          : ''}
+      </div>
+    </div>
+  `).join('');
+
+  // Attach click-to-select on each card (but not on the delete button)
+  grid.querySelectorAll('.item-card').forEach(card => {
+    card.addEventListener('click', (e) => {
+      if (e.target.closest('.delete-btn')) return;
+      toggleSelect(card.dataset.id);
+    });
+  });
+}
+
+// ─── Selection & outfit panel ────────────────────────────────────────────────
+function toggleSelect(id) {
+  if (selectedIds.has(id)) {
+    selectedIds.delete(id);
+  } else {
+    selectedIds.add(id);
+  }
+  renderGrid();
+  renderOutfit();
+}
+
+function renderOutfit() {
+  if (selectedIds.size < 2) {
+    outfitPanel.classList.remove('visible');
+    return;
+  }
+
+  outfitPanel.classList.add('visible');
+  outfitCount.textContent = `(${selectedIds.size} items)`;
+
+  const selected = allItems.filter(item => selectedIds.has(item.id));
+
+  outfitItems.innerHTML = selected.map(item => `
+    <div class="outfit-item">
+      <button class="deselect-btn" onclick="toggleSelect('${item.id}')" title="Remove from outfit">✕</button>
+      <img src="/uploads/${item.filename}" alt="${item.item_type}">
+      <div class="outfit-label">${item.item_type}${item.colour ? ` · ${item.colour}` : ''}</div>
+    </div>
+  `).join('');
+}
+
+clearBtn.addEventListener('click', () => {
+  selectedIds.clear();
+  renderGrid();
+  renderOutfit();
+});
+
+// ─── Delete item ─────────────────────────────────────────────────────────────
+async function deleteItem(e, id) {
+  e.stopPropagation();
+  if (!confirm('Remove this item from your wardrobe?')) return;
+
+  try {
+    const res = await fetch(`/api/items/${id}`, { method: 'DELETE' });
+    if (!res.ok) {
+      const data = await res.json();
+      alert(data.error || 'Delete failed.');
+      return;
+    }
+    selectedIds.delete(id);
+    await loadItems();
+    renderOutfit();
+  } catch (err) {
+    alert(`Network error: ${err.message}`);
+  }
+}
+
+// ─── Status helpers ──────────────────────────────────────────────────────────
+function setStatus(type, message) {
+  statusBar.className = `status-bar ${type}`;
+  statusBar.innerHTML = message;
+}
+function hideStatus() {
+  statusBar.className = 'status-bar';
+}
+
+// ─── Init ────────────────────────────────────────────────────────────────────
+loadItems();
+</script>
+
+</body>
+</html>

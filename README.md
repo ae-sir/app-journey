@@ -12,4 +12,15 @@
     When you type a fake city, an error is thrown and the dashboard displays "No city found in "example wrong city". Please check spelling and try again". The input city is checked in the: if !response.ok section of the code. If the error is thrown (i.e. 404 error), this code then triggers the err.message to be displayed. The err.message is whatever string is denoted in the new Error block
 
     To preview code, use "CTRL+SHIFT+V"
-    
+
+---
+
+## Level 3 Complete: Personal Expense Tracker — Skills learned and where they appear in Level 5
+
+| Skill learned here | Where it appears in Level 5 |
+|---|---|
+| Supabase table + CRUD | `wardrobe_items` table — add, view, edit, delete clothes |
+| Category column + filter | Filter wardrobe by type (tops, shoes, outerwear) |
+| `created_at` ordering | Show recently added items first |
+| RLS policies | Lock each user's wardrobe to only their own rows when you add auth |
+| Supabase anon key pattern | Same pattern for the wardrobe app's database connection |
