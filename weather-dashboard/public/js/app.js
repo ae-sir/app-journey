@@ -11,7 +11,9 @@ async function fetchWeather(city) {
     const data = await response.json();
 
     if (!response.ok) {
-      // OpenWeatherMap puts its error message in data.message
+      if (response.status === 404) {
+        throw new Error(`No city found for "${city}". Check the spelling and try again.`);
+      }
       throw new Error(data.message || 'Something went wrong');
     }
 
@@ -65,7 +67,11 @@ function capitalise(str) {
 
 function handleSearch() {
   const city = cityInput.value.trim();
-  if (city) fetchWeather(city);
+  if (!city) {
+    showError('Please enter a city name.');
+    return;
+  }
+  fetchWeather(city);
 }
 
 searchBtn.addEventListener('click', handleSearch);
