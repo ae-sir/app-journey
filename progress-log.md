@@ -144,3 +144,26 @@ None during the build itself — the integration was straightforward because bot
 
 ### What clicked
 Verification before committing isn't just good hygiene — it's about preserving the ability to isolate bugs later. If a bug surfaces in 5c (auth), it needs to be attributable to the auth layer, not to an unverified integration. Committing a clean, verified baseline means any future regression can be confidently traced to whatever changed after this commit. "Claude Code said it's done" is not a baseline. A passing checklist is.
+
+---
+
+## Level 5c — Authentication
+**Date completed:** 19 May 2026
+**Commit:** `1827fef`
+
+### What was built
+Email and password authentication added to the wardrobe app. A new login page requires credentials before accessing the app. The wardrobe grid, uploads, and deletions are now protected behind a verified session — only the registered user can view or modify their wardrobe data. The weather widget remains intentionally unauthenticated.
+
+### What was learned
+- **Auth vs RLS** — auth is the security layer that guards access to the app itself, requiring credentials before any functionality is available. RLS operates at the database level and controls which rows a verified user can read or modify. Auth establishes identity; RLS uses that identity to enforce data ownership. Both layers are required — RLS without auth means the policies run but `auth.uid()` always returns null; auth without RLS means a logged-in user could access any row in the table.
+- **Per-request Supabase client (`req.db`)** — the global Supabase client is initialised with only the anon key and has no knowledge of the logged-in user. Without attaching the user's JWT to outgoing database calls, Supabase evaluates `auth.uid()` as null server-side. The RLS policy `USING (auth.uid() = user_id)` never matches null, so every query returns empty results or fails silently. The fix is a per-request client that carries the user's JWT in its headers, so `auth.uid()` resolves correctly to the user's UUID on Supabase's side.
+- **JWT structure** — tokens are three base64 segments separated by dots. They are signed but not encrypted — anyone can read the payload (which includes your email, UUID, and expiry timestamp). Security comes from the signature, not secrecy. This is why HTTPS matters in production: it encrypts the transport layer so tokens can't be intercepted in transit.
+- **`requireAuth` middleware** — a single Express middleware function that runs before every protected route. It extracts the Bearer token from the Authorization header, validates it via `supabase.auth.getUser(token)`, attaches `req.user` and `req.db` to the request object, and returns 401 if anything fails. Route handlers never run without a verified identity.
+- **Curl as a security verification tool** — the browser always runs your JavaScript, so browser tests can only prove the UI works correctly. Curl bypasses the frontend entirely and sends raw HTTP requests directly to the API — simulating exactly what a malicious user would do. When curl returns 401 with no header, a fake token, and a malformed header, it proves the server itself enforces auth independently of the frontend. If the server only enforced auth because the UI was polite about it, anyone could bypass it by writing their own curl command.
+
+### Gotchas hit
+- **`auth.uid()` returning null** — the most likely silent failure mode when using the global Supabase client for database queries after auth is set up. Symptoms would be an empty wardrobe grid despite successful login, with no visible error. Fixed by the per-request client pattern (`req.db`) which carries the user JWT on every outgoing database call.
+- **Three-step column migration** — adding `user_id` as `NOT NULL` in a single `ALTER TABLE` statement fails if existing rows have no value for that column. The correct order: add the column as nullable, backfill existing rows with the user's UUID, then set it `NOT NULL`.
+
+### What clicked
+Auth and RLS are two separate locks on two separate doors. Auth controls who can enter the building. RLS controls which rooms they can access once inside. Setting up auth without rewriting RLS policies leaves the rooms unlocked for any verified user. Setting up RLS without auth means the room locks work but the front door is open. The curl tests were the moment this became concrete — proving that a correctly implemented server rejects requests that bypass the frontend entirely, not just requests that fail the UI flow.
